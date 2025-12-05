@@ -2,9 +2,15 @@ import express from "express";
 import router from "./routes/root.routes.js";
 import productsRouter from "./routes/products.routes.js"
 import handlebars from "express-handlebars";
+import http from "http";
+import { Server } from "socket.io";
 
-const app = express();
 const PORT = 5000
+const app = express();
+const servidor = http.createServer(app);
+const servidorWS = new Server(servidor);
+
+app.use(express.static("public"))
 app.use(express.json());
 app.engine('handlebars', handlebars.engine());
 app.set('view engine','handlebars');
@@ -12,12 +18,16 @@ app.use("/", router);
 app.use("/products", productsRouter)
 
 
-const server = app.listen(PORT, () => {
+servidor.listen(PORT, () => {
     console.log(`servidor corriendo en el puerto ${PORT}`);
 });
 
-server.on("request", () => {
-    console.log("acaba de ingresar una solicitud")
+// servidor.on("request", () => {
+//     console.log("acaba de ingresar una solicitud")
+// });
+
+servidorWS.on("connection", (socket) => {
+    console.log("cliente ws conectado")
 });
 
 
