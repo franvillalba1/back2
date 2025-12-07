@@ -4,6 +4,7 @@ import productsRouter from "./routes/products.routes.js"
 import handlebars from "express-handlebars";
 import http from "http";
 import { Server } from "socket.io";
+import cartRouter from "./routes/cart.routes.js"
 
 const PORT = 5000
 const app = express();
@@ -16,7 +17,7 @@ app.engine('handlebars', handlebars.engine());
 app.set('view engine','handlebars');
 app.use("/", router);
 app.use("/products", productsRouter)
-
+app.use("/cart", cartRouter);
 
 servidor.listen(PORT, () => {
     console.log(`servidor corriendo en el puerto ${PORT}`);
