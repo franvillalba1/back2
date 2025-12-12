@@ -5,6 +5,7 @@ import handlebars from "express-handlebars";
 import http from "http";
 import { Server } from "socket.io";
 import cartRouter from "./routes/cart.routes.js"
+import mongoose from "mongoose";
 
 const PORT = 5000
 const app = express();
@@ -19,9 +20,16 @@ app.use("/", router);
 app.use("/products", productsRouter)
 app.use("/cart", cartRouter);
 
-servidor.listen(PORT, () => {
+mongoose.connect("mongodb://localhost:27017/test")
+.then(() => {
+    console.log("conectado a la base de datos");
+    servidor.listen(PORT, () => {
     console.log(`servidor corriendo en el puerto ${PORT}`);
 });
+})
+.catch((error) =>{
+    console.log("no se pudo conectar a la base de datos, verifique")
+})
 
 // servidor.on("request", () => {
 //     console.log("acaba de ingresar una solicitud")

@@ -1,25 +1,66 @@
+import productModel from "../models/product.model.js";
+
 export const products = [];
 let idActual = 1;
 
- function productsController(req, res) {
-    console.log("ruta productos ok")
-    res.json(products);
-}
-
- function createProductController(req, res) {
-    createProduct(req.body.title, req.body.description, req.body.code, req.body.price, req.body.status, req.body.stock, req.body.category);
-    res.send("producto creado exitosamente")
-};
-
- function getProductsByIdController (req, res){
-    const id = Number(req.params.id)
-    const product = products.find(p => p.id ===id);
-    if (product) {
-        res.json(product)
-    } else {
-        res.status(404).json({ message: "no hay productos disponibles" });
+ async function productsController(req, res) {
+    try {
+        const products = await productModel.find();
+        res.status(200).json({
+            message: "todos los productos obtenidos con exito",
+            products
+        })
+    } catch (error) {
+        res.status(404).json({
+            message: "error en controlador productos 1",
+            error
+        })
     }
 }
+
+ async function createProductController(req, res) {
+    try {
+        const {title, description, code, price, status, stock, category} = req.body;
+        const newProduct = await productModel.create({
+            title,
+            description,
+            code,
+            price,
+            status,
+            stock,
+            category
+        })
+        res.status(201).json({
+            message: "producto creado con exito",
+            newProduct
+        })
+    } catch (error) {
+        res.status(500).json({
+            message: "error en el controlador de crear producto",
+            error
+        })
+    }
+};
+
+ async function getProductsByIdController (req, res){
+    try {
+        const {id} = req.params
+        const product = await productModel.findById(id);
+        if (!product) {
+            return res.send("no se encontraron productos")
+        }
+        res.status(200).json({
+            message: "productos encontrados disponibles",
+            product
+        }); 
+    }
+    catch (error) {
+        res.status(500).json({
+            message: "hubo un error en controlador 1 producto",
+            error
+        });
+    }
+    } 
 
 function createProduct(title, description, code, price, status, stock, category){
     const product = {

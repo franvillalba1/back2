@@ -1,20 +1,52 @@
+import cartModel from "../models/cart.model.js";
 import { products } from "./productsController.js";
 
 
 let carts = [];
 
-export function cardController (req, res){
-    console.log("ruta carrito ok");
-    res.send("todo bien")
+export async function cardController (req, res){
+    try {
+        const carts = await cartModel.find();
+        res.status(200).json({
+            message: "todos los carritos",
+            carts
+        });
+        
+    } catch (error) {
+        res.status(500).json({
+            message: "error en controlador carritos",
+            error
+        })
+    }
 }
-export function createCartController (req, res) {
-    createCart();
-    res.status(201).send("carrito creado con exito")
+export async function createCartController (req, res) {
+    try {
+        const newCart = await cartModel.create({});
+        res.status(201).json(newCart);
+    } catch (error) {
+        res.status(500).send("error al crear carrito, controlador cart", error);
+    }
 }
 
-export function findCartByIdController(req, res){
-    findCartById(req, res);
-    
+export async function findCartByIdController(req, res){
+    try {
+        const { id } =req.params
+        const cart = await cartModel.findById(id);
+        if(!cart){
+            return res.status(404).json({
+                message : "carrito inexistente"
+            });
+        }
+        res.status(200).json({
+            message: "carrito encontrado",
+            cart
+        });
+    } catch (error) {
+        res.status(500).json({
+            message: "error en controlador by id",
+            error
+        });
+    }
 }
 
 
@@ -28,13 +60,13 @@ export function findCartById(req, res){
     }
 }
 
-export function createCart(){
-    const newCart = {
-        id: carts.length === 0 ? 1 : carts[carts.length - 1].id +1,
-        products: []
-    };
-    carts.push(newCart);
-};
+// export function createCart(){
+//     const newCart = {
+//         id: carts.length === 0 ? 1 : carts[carts.length - 1].id +1,
+//         products: []
+//     };
+//     carts.push(newCart);
+// };
 
 export function addProductToCartController(req, res) {
     const cid= Number(req.params.cid);
