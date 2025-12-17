@@ -48,17 +48,42 @@ export async function findCartByIdController(req, res){
         });
     }
 }
-
-
-export function findCartById(req, res){
-   const id = Number(req.params.id);
-    const cart = carts.find(c => c.id === id)
-    if (cart) {
-        res.json(cart)
-    } else {
-        res.status(404).send("no existe carrito")
+export async function addProductToCartController(req, res){
+    try {
+        const {cid, pid} = req.params;
+        const cart = await cartModel.findById(cid);
+        if(!cart){
+            return res.status(404).send("carrito inexistente");
+        }
+            const productInCart =cart.products.find(
+                p => p.product.toString() ===pid
+            );
+                if (!productInCart) {
+                    cart.products.push({
+                        product: pid,
+                        quantity: 1
+                    })
+                } else {
+                    productInCart.quantity +=1
+                }
+                await cart.save();
+    } catch (error) {
+        res.status(500).json({
+            message: "error en controlador de agregar productos",
+            error
+        })
     }
 }
+
+// export function findCartById(req, res){
+//    const id = Number(req.params.id);
+//     const cart = carts.find(c => c.id === id)
+//     if (cart) {
+//         res.json(cart)
+//     } else {
+//         res.status(404).send("no existe carrito")
+//     }
+// }
 
 // export function createCart(){
 //     const newCart = {
@@ -68,23 +93,23 @@ export function findCartById(req, res){
 //     carts.push(newCart);
 // };
 
-export function addProductToCartController(req, res) {
-    const cid= Number(req.params.cid);
-    const pid= Number(req.params.pid);
+// export function addProductToCartController(req, res) {
+//     const cid= Number(req.params.cid);
+//     const pid= Number(req.params.pid);
 
-    const cart = carts.find(c => c.id === cid);
-    if (!cart) {
-        return res.status(404).send("carrito inexistente");
-    } 
-    const productInCart = cart.products.find(p => p.product === pid);
+//     const cart = carts.find(c => c.id === cid);
+//     if (!cart) {
+//         return res.status(404).send("carrito inexistente");
+//     } 
+//     const productInCart = cart.products.find(p => p.product === pid);
 
-    if (!productInCart) {
-        cart.products.push({
-            product: pid,
-            quantity: 1
-        });
-    } else {
-        productInCart.quantity +=1
-    }
-    res.status(201).send("producto agregado exitosamente")
-};
+//     if (!productInCart) {
+//         cart.products.push({
+//             product: pid,
+//             quantity: 1
+//         });
+//     } else {
+//         productInCart.quantity +=1
+//     }
+//     res.status(201).send("producto agregado exitosamente")
+// };

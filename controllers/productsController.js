@@ -62,6 +62,44 @@ let idActual = 1;
     }
     } 
 
+    async function updateProduct(req, res) {
+        try {
+            const {id} = req.params;
+            const {stock} = req.body;
+            const product = await productModel.findById(id);
+            if(!product){
+                return res.status(404).send("no se encontro producto");
+            }
+            const result = await productModel.updateOne({_id : id},{stock : stock});
+            res.status(200).json({
+                message: "se actualizo el stock",
+                result
+            })
+        } catch (error) {
+            res.status(500).json({
+                message: "error en controlador update",
+                error
+            })
+        }  
+    }
+    async function deleteProduct(req, res) {
+        try {
+            const {id} = req.params;
+            const result = await productModel.findByIdAndDelete(id);
+            if(!result){
+                return res.status(404).json({
+                    message: "no existe el producto a borrar"
+                })}
+                res.status(200).json({
+                    message: "producto localizado y borrado",
+                    result
+            })
+        } catch (error) {
+            res.status(500).json({
+                message: "error en controlador de borrado"
+            })
+        }
+    }
 function createProduct(title, description, code, price, status, stock, category){
     const product = {
         id: idActual,
@@ -78,4 +116,4 @@ function createProduct(title, description, code, price, status, stock, category)
 }
 
 export default productsController; 
-export {createProductController, getProductsByIdController}
+export {createProductController, getProductsByIdController, updateProduct, deleteProduct}
