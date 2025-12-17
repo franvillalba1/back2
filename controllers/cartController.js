@@ -1,78 +1,122 @@
 import cartModel from "../models/cart.model.js";
 import { products } from "./productsController.js";
 
-
 let carts = [];
 
-export async function cardController (req, res){
-    try {
-        const carts = await cartModel.find();
-        res.status(200).json({
-            message: "todos los carritos",
-            carts
-        });
-        
-    } catch (error) {
-        res.status(500).json({
-            message: "error en controlador carritos",
-            error
-        })
-    }
+export async function cardController(req, res) {
+  try {
+    const carts = await cartModel.find();
+    res.status(200).json({
+      message: "todos los carritos",
+      carts,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "error en controlador carritos",
+      error,
+    });
+  }
 }
-export async function createCartController (req, res) {
-    try {
-        const newCart = await cartModel.create({});
-        res.status(201).json(newCart);
-    } catch (error) {
-        res.status(500).send("error al crear carrito, controlador cart", error);
-    }
+export async function createCartController(req, res) {
+  try {
+    const newCart = await cartModel.create({});
+    res.status(201).json(newCart);
+  } catch (error) {
+    res.status(500).send("error al crear carrito, controlador cart", error);
+  }
 }
 
-export async function findCartByIdController(req, res){
-    try {
-        const { id } =req.params
-        const cart = await cartModel.findById(id);
-        if(!cart){
-            return res.status(404).json({
-                message : "carrito inexistente"
-            });
-        }
-        res.status(200).json({
-            message: "carrito encontrado",
-            cart
-        });
-    } catch (error) {
-        res.status(500).json({
-            message: "error en controlador by id",
-            error
-        });
+export async function findCartByIdController(req, res) {
+  try {
+    const { id } = req.params;
+    const cart = await cartModel.findById(id);
+    if (!cart) {
+      return res.status(404).json({
+        message: "carrito inexistente",
+      });
     }
+    res.status(200).json({
+      message: "carrito encontrado",
+      cart,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "error en controlador by id",
+      error,
+    });
+  }
 }
-export async function addProductToCartController(req, res){
-    try {
-        const {cid, pid} = req.params;
-        const cart = await cartModel.findById(cid);
-        if(!cart){
-            return res.status(404).send("carrito inexistente");
-        }
-            const productInCart =cart.products.find(
-                p => p.product.toString() ===pid
-            );
-                if (!productInCart) {
-                    cart.products.push({
-                        product: pid,
-                        quantity: 1
-                    })
-                } else {
-                    productInCart.quantity +=1
-                }
-                await cart.save();
-    } catch (error) {
-        res.status(500).json({
-            message: "error en controlador de agregar productos",
-            error
-        })
+export async function addProductToCartController(req, res) {
+  try {
+    const { cid, pid } = req.params;
+    const cart = await cartModel.findById(cid);
+    if (!cart) {
+      return res.status(404).send("carrito inexistente");
     }
+    const productInCart = cart.products.find(
+      (p) => p.product.toString() === pid
+    );
+    if (!productInCart) {
+      cart.products.push({
+        product: pid,
+        quantity: 1,
+      });
+    } else {
+      productInCart.quantity += 1;
+    }
+    await cart.save();
+  } catch (error) {
+    res.status(500).json({
+      message: "error en controlador de agregar productos",
+      error,
+    });
+  }
+}
+
+export async function modifyProductInCartController(req, res) {
+  try {
+    const { cid, pid } = req.params;
+    const { quantity } = req.body;
+    const cart = await cartModel.findById(cid);
+    if (!cart) {
+      return res.status(404).send("carrito inexistente");
+    }
+    const productInCart = cart.products.find(
+      (p) => p.product.toString() === pid
+    );
+    if (!productInCart) {
+      return res.status(404).send("no existen productos");
+    }
+    productInCart.quantity = quantity;
+    await cart.save();
+    return res.status(200).json({
+      message: "cantidad de producto actualizada",
+      cart,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "error en controlador de modificar productos",
+      error,
+    });
+  }
+}
+export async function deleteCart(req, res) {
+  try {
+    const { id } = req.params;
+    const result = await cartModel.findByIdAndDelete(id);
+    if (!result) {
+      return res.status(404).send("carrito inexistente");
+    }
+    res.status(200).json({
+      message: "carrito borrado exitosamente",
+      result,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "error en controlador borrado",
+      error,
+    });
+  }
 }
 
 // export function findCartById(req, res){
@@ -100,7 +144,7 @@ export async function addProductToCartController(req, res){
 //     const cart = carts.find(c => c.id === cid);
 //     if (!cart) {
 //         return res.status(404).send("carrito inexistente");
-//     } 
+//     }
 //     const productInCart = cart.products.find(p => p.product === pid);
 
 //     if (!productInCart) {
